@@ -1,17 +1,22 @@
 <div style="display:flex;flex-direction:row; justify-content: space-between;">
-    <button style="flex: 1 1 30ch;" id="fetcher">Fetch</button>
-    <button style="flex: 1 1 30ch;" id="prevDate">Prev Date</button>
-    <button style="flex: 1 1 30ch;" id="nextDate">Next Date</button>
+    <button style="flex: 1 1 30ch; height: 10ch; font-size: 1em;" id="prevDate">Prev Date</button>
+    <button style="flex: 1 1 30ch; height: 10ch; font-size: 1em;" id="fetcher">Fetch</button>
+    <button style="flex: 1 1 30ch; height: 10ch; font-size: 1em;" id="nextDate">Next Date</button>
 </div>
-<div style="display:flex;flex-direction:row">
+<div class="mob">
     <div style="flex:1">
-      <input id="PINCODE1" value="221002"/>
-      <input id="DATE1" value="" type="date"/>
+        <div style="flex:1; display: flex;">
+            <input id="PINCODE1" style="flex:1;height: 8.8ch; font-size: 1em;"  value="221002"/>
+            <input id="DATE1" style="flex:1;height: 10ch; font-size: 1em;"  value="" type="date"/>
+        </div>
       <div id="detail1"></div>
     </div>
+    <div class="border"></div>
     <div style="flex:1">
-      <input id="PINCODE2" value="221005"/>
-      <input id="DATE2" value="" type="date"/>
+        <div style="flex:1; display: flex;">
+            <input id="PINCODE2"  style="flex:1;height: 8.8ch; font-size: 1em;" value="221005"/>
+            <input id="DATE2"  style="flex:1;height: 10ch; font-size: 1em;" value="" type="date"/>
+        </div>
       <div id="detail2"></div>
     </div>
   </div>
@@ -96,3 +101,18 @@
 
       callMaker();
   </script>
+  <style>
+      .mob {
+              display: flex;
+              flex-direction:row;
+      }   
+      @media only screen and (max-width: 740px) {
+          .border{
+              border: 1em dashed black;
+          }
+          .mob {
+              display: flex;
+              flex-direction:column;
+          }
+      }
+  </style>
