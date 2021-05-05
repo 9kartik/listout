@@ -1,30 +1,98 @@
-<div style="display:flex;flex-direction:row">
-  <div style="flex:1">
-    <input id="PINCODE1" value=""/>
-      <div>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-    </div>
-  </div>
-  <div style="flex:1">
-    <input id="PINCODE2" value=""/>
-    <div>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-    </div>
-  </div>
+<div style="display:flex;flex-direction:row; justify-content: space-between;">
+    <button style="flex: 1 1 30ch;" id="fetcher">Fetch</button>
+    <button style="flex: 1 1 30ch;" id="prevDate">Prev Date</button>
+    <button style="flex: 1 1 30ch;" id="nextDate">Next Date</button>
 </div>
-
-<script type="text/template">
-  <div>
-    <span></span>
+<div style="display:flex;flex-direction:row">
+    <div style="flex:1">
+      <input id="PINCODE1" value="221002"/>
+      <input id="DATE1" value="" type="date"/>
+      <div id="detail1"></div>
+    </div>
+    <div style="flex:1">
+      <input id="PINCODE2" value="221005"/>
+      <input id="DATE2" value="" type="date"/>
+      <div id="detail2"></div>
+    </div>
   </div>
-</script>
+  
+  <script id="template" type="text/template">
+      <div>#vaccine</div>
+      <div>#min_age_limit+</div>
+      <div>#name</div>
+      <div>#slots</div>
+      <div>
+          <span>Time Slot- #from -> #to</span>
+      </div>
+      <div>Avl - #available_capacity</div>
+  </script>
+  
+  <script>
+      var url = 'https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByPin?pincode=#pincode&date=#date';
+      
+      var date1 = document.getElementById('DATE1'); 
+      var date2 = document.getElementById('DATE2'); 
+      var detail1 = document.getElementById('detail1'); 
+      var detail2 = document.getElementById('detail2'); 
+      var pincode1 = document.getElementById('PINCODE1'); 
+      var pincode2 = document.getElementById('PINCODE2'); 
+      
+      date1.valueAsDate = new Date()
+      date2.valueAsDate = new Date()
+
+      const newFormat = (dateValue) => {
+          //"DD-MM-YYYY"
+          return [dateValue.getDate(), dateValue.getMonth() + 1, dateValue.getFullYear()].join('-')
+      }
+
+      const buildUITemplate = (result) =>{
+          let uiTemp = document.getElementById('template').innerHTML;
+          let uiTempCopy = uiTemp;
+          uiTempCopy.match(/(?<=#)\w+/g).
+                forEach(key => uiTemp = uiTemp.replace('#' + key , result[key]))
+          const headerDiv = document.createElement('div');
+          headerDiv.style = 'border:1px dotted grey';
+          headerDiv.innerHTML = uiTemp;
+          const frag = document.createDocumentFragment();
+          frag.appendChild(headerDiv)
+          return frag;
+      }
+
+      const clearDivs = () => {
+        detail1.innerHTML = ''
+        detail2.innerHTML = ''
+      }
+
+      const callMaker = () => [1,2].forEach(
+                            value => {
+                                const sessions = fetch(  
+                                    url
+                                    .replace('#pincode', document.getElementById('PINCODE' + value).value)
+                                    .replace('#date', newFormat(document.getElementById('DATE' + value).valueAsDate))
+                                ).then(res => res.json()).
+                                then(({sessions}) => sessions.forEach( centre => 
+                                document.getElementById('detail'+value).appendChild(buildUITemplate(centre))))
+                        });
+
+
+      document.getElementById('fetcher').onclick = function(){
+        clearDivs();
+        callMaker();
+      }
+      
+      document.getElementById('nextDate').onclick = function(){
+        date1.valueAsDate = new Date(date1.valueAsDate.setDate(date1.valueAsDate.getDate() + 1))
+        date2.valueAsDate = new Date(date2.valueAsDate.setDate(date2.valueAsDate.getDate() + 1))
+        clearDivs();
+        callMaker();
+      }
+      
+      document.getElementById('prevDate').onclick = function(){
+        date1.valueAsDate = new Date(date1.valueAsDate.setDate(date1.valueAsDate.getDate() - 1))
+        date2.valueAsDate = new Date(date2.valueAsDate.setDate(date2.valueAsDate.getDate() - 1))
+        clearDivs();
+        callMaker();
+      }
+
+      callMaker();
+  </script>
