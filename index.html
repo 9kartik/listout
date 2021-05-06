@@ -24,18 +24,20 @@
   </div>
   
   <script id="template" type="text/template">
-      <div>#vaccine</div>
+    <div class="color#available_capacity">
+      <div>#vaccine | #date</div>
       <div>#min_age_limit+</div>
-      <div>#name</div>
+      <div>#address</div>
       <div>#slots</div>
       <div>
           <span>Time Slot- #from -> #to</span>
       </div>
       <div>Avl - #available_capacity</div>
+    </div>
   </script>
   
   <script>
-      var url = 'https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByPin?pincode=#pincode&date=#date';
+      var url = 'https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByPin?pincode=#pincode&date=#date';
       
       var date1 = document.getElementById('DATE1'); 
       var date2 = document.getElementById('DATE2'); 
@@ -70,44 +72,67 @@
         detail2.innerHTML = ''
       }
 
+      const readPinsFromStore = () => {
+          if(localStorage.getItem('COWINPin1'))
+            pincode1.value = localStorage.getItem('COWINPin1');
+          if(localStorage.getItem('COWINPin2'))
+            pincode2.value = localStorage.getItem('COWINPin2');
+      }
+
+      const storePins = () => {
+          localStorage.setItem('COWINPin1', pincode1.value)
+          localStorage.setItem('COWINPin2', pincode2.value)
+      }
+
       const callMaker = () => [1,2].forEach(
                             value => {
-                                const sessions = fetch(  
+                                const centers = fetch(  
                                     url
                                     .replace('#pincode', document.getElementById('PINCODE' + value).value)
                                     .replace('#date', newFormat(document.getElementById('DATE' + value).valueAsDate))
                                 ).then(res => res.json()).
-                                then(({sessions}) => sessions.forEach( centre => 
-                                document.getElementById('detail'+value).appendChild(buildUITemplate(centre))))
+                                then(({centers}) => centers.flatMap(({from, to, address, sessions}) => sessions.map(session => ({...session, address, from, to})))).
+                                then(session => (console.log(session), session)).
+                                then(session => session.forEach( centre => 
+                                 document.getElementById('detail'+value).appendChild(buildUITemplate(centre))))
                         });
 
-
-      document.getElementById('fetcher').onclick = function(){
+      const fullCall = () => {
         clearDivs();
         callMaker();
+        storePins();
+      }
+
+      document.getElementById('fetcher').onclick = function(){
+        fullCall();
       }
       
       document.getElementById('nextDate').onclick = function(){
         date1.valueAsDate = new Date(date1.valueAsDate.setDate(date1.valueAsDate.getDate() + 1))
         date2.valueAsDate = new Date(date2.valueAsDate.setDate(date2.valueAsDate.getDate() + 1))
-        clearDivs();
-        callMaker();
+        fullCall();
       }
       
       document.getElementById('prevDate').onclick = function(){
         date1.valueAsDate = new Date(date1.valueAsDate.setDate(date1.valueAsDate.getDate() - 1))
         date2.valueAsDate = new Date(date2.valueAsDate.setDate(date2.valueAsDate.getDate() - 1))
-        clearDivs();
-        callMaker();
+        fullCall();
       }
 
+      readPinsFromStore();
       callMaker();
   </script>
   <style>
       .mob {
               display: flex;
               flex-direction:row;
-      }   
+      }
+      div[class^="color"]{
+          background: lightseagreen;
+      }
+      div.color0{
+          background: lightpink;
+      }
       @media only screen and (max-width: 740px) {
           .border{
               border: 1em solid lightblue;
