@@ -28,10 +28,6 @@
       <div>#vaccine | #date</div>
       <div class="float_age">#min_age_limit+</div>
       <div>#address</div>
-      <div>#slots</div>
-      <div>
-          <span>Time Slot- #from -> #to</span>
-      </div>
       <div>Avl - #available_capacity</div>
     </div>
   </script>
@@ -90,7 +86,7 @@
                                     .replace('#date', newFormat(document.getElementById('DATE' + value).valueAsDate))
                                 ).then(res => res.json()).
                                 then(({centers}) => centers.flatMap(({from, to, address, sessions}) => sessions.map(session => ({...session, address, from, to})))).
-                                then(session => (console.log(session), session)).
+                                then(session => (console.log(session), session.sort((item1, item2)=> item2.available_capacity - item1.available_capacity))).
                                 then(session => session.forEach( centre => 
                                  document.getElementById('detail'+value).appendChild(buildUITemplate(centre))))
                         };
