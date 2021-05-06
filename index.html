@@ -2,7 +2,7 @@
 
 <div style="display:flex;flex-direction:row; justify-content: space-between;">
     <button style="flex: 1 1 30ch; height: 10ch; font-size: 1em;" id="prevDate">Prev Date</button>
-    <button style="flex: 1 1 30ch; height: 10ch; font-size: 1em;" id="fetcher">Fetch</button>
+    <button style="flex: 1 1 30ch; height: 10ch; font-size: 1em;" id="fetcher">Reload</button>
     <button style="flex: 1 1 30ch; height: 10ch; font-size: 1em;" id="nextDate">Next Date</button>
 </div>
 <div class="mob">
@@ -67,9 +67,8 @@
           return frag;
       }
 
-      const clearDivs = () => {
-        detail1.innerHTML = ''
-        detail2.innerHTML = ''
+      const clearDivs = (domElt) => {
+        domElt.innerHTML = ''
       }
 
       const readPinsFromStore = () => {
@@ -84,8 +83,7 @@
           localStorage.setItem('COWINPin2', pincode2.value)
       }
 
-      const callMaker = () => [1,2].forEach(
-                            value => {
+      const callMaker = (value) => {
                                 const centers = fetch(  
                                     url
                                     .replace('#pincode', document.getElementById('PINCODE' + value).value)
@@ -95,11 +93,32 @@
                                 then(session => (console.log(session), session)).
                                 then(session => session.forEach( centre => 
                                  document.getElementById('detail'+value).appendChild(buildUITemplate(centre))))
-                        });
+                        };
+
+      const triggerRender = (detailElt, index) => {
+        clearDivs(detailElt)
+        callMaker(index)
+        storePins();
+      }
+      
+      pincode1.onkeyup = ({target}) => {
+        if (target.value.length == 6)
+          triggerRender(detail1, 1)
+      }
+      
+      pincode2.onkeyup = ({target}) => {
+        if (target.value.length == 6)
+        triggerRender(detail2, 2)
+      }
+
+      date1.onchange = () => triggerRender(detail1, 1)
+      date2.onchange = () => triggerRender(detail2, 2)
 
       const fullCall = () => {
-        clearDivs();
-        callMaker();
+        clearDivs(detail1);
+        clearDivs(detail2);
+        callMaker(1);
+        callMaker(2);
         storePins();
       }
 
@@ -120,7 +139,8 @@
       }
 
       readPinsFromStore();
-      callMaker();
+      callMaker(1);
+      callMaker(2);
   </script>
   <style>
       .mob {
